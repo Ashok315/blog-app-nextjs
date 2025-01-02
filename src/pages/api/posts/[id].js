@@ -1,4 +1,4 @@
-import { dbQuery } from '../../../lib/db';
+import { dbQuery } from '../../../utils/db';
 
 export default async function handler(req, res) {
   const { id } = req.query;

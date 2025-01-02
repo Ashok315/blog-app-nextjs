@@ -1,20 +1,6 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { baseUrl } from "@/utils/baseUrl";
 
-export default function SinglePost() {
-  const router = useRouter();
-  const { id } = router.query;
-
-  const [post, setPost] = useState(null);
-
-  useEffect(() => {
-    if (id) {
-      fetch(`/api/posts/${id}`)
-        .then((response) => response.json())
-        .then((data) => setPost(data));
-    }
-  }, [id]);
-
+export default function SinglePost({ post }) {
   if (!post) return <div>Loading...</div>;
 
   return (
@@ -27,7 +13,7 @@ export default function SinglePost() {
         <div className="flex items-center text-sm text-gray-500 mb-4">
           <p>By {post.author}</p>
           <span className="mx-2">|</span>
-          <p>{new Date(post.created_at).toLocaleDateString()}</p>
+          <p>{post.created_at}</p>
         </div>
         
         {/* Post Content */}
@@ -36,9 +22,35 @@ export default function SinglePost() {
         </div>
 
         {/* Comments Section */}
-
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+          {/* Render comments here */}
+        </div>
       </div>
     </div>
   );
 }
 
+// Fetch post data on each request
+export async function getServerSideProps(context) {
+
+  const { id } = context.params;
+
+  try {
+    const res = await fetch(`${baseUrl}/api/posts/${id}`);
+    const post = await res.json();
+
+        // Format the date on the server
+        const formattedPost = {
+          ...post,
+          created_at: new Date(post.created_at).toLocaleDateString(),
+        };
+    
+        return {
+          props: { post: formattedPost },
+        };
+
+  } catch (error) {
+      console.log(error.message)
+  }
+}

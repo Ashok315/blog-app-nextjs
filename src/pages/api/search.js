@@ -1,9 +1,9 @@
-import { dbQuery } from '../../lib/db';
+import { dbQuery } from '../../utils/db';
 
 export default async function handler(req, res) {
 
     // search blog post
-    
+
 if (req.method === 'GET') {
     const { query } = req.query;
    

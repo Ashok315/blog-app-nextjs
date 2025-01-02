@@ -1,27 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PostCard from '@/components/PostCard';
 import BlogSearch from '@/components/BlogSearch';
 import Pagination from '@/components/Pagination';
+import { baseUrl } from '@/utils/baseUrl';
 
-const Home = () => {
-  const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
+const Home = ({ posts }) => {
+  const [filteredPosts, setFilteredPosts] = useState(posts);
 
-  let postPerPage=6
-  const [currentPage,setCurrentPage]=useState(1);
+  let postPerPage = 6;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  let indexOfLastPost=currentPage*postPerPage;
-  let indexOfFirstPost=indexOfLastPost-postPerPage;
+  let indexOfLastPost = currentPage * postPerPage;
+  let indexOfFirstPost = indexOfLastPost - postPerPage;
 
-  const paginate=(pageNumber)=>setCurrentPage(pageNumber)
-  
-  useEffect(() => {
-    fetch('http://localhost:3000/api/posts')
-      .then((response) => response.json())
-      .then((data) => {
-        setPosts(data) 
-        setFilteredPosts(data)});
-  }, []);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSearch = (query) => {
     if (!query) {
@@ -35,26 +27,42 @@ const Home = () => {
     }
   };
 
-
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Blog Web Application</h1>
 
-      {/* search blog */}
-      <BlogSearch onSearch={handleSearch}></BlogSearch>
-
-      {/* list of blogs */}
+      {/* Search blog */}
+      <BlogSearch onSearch={handleSearch} />
+      {/* List of blogs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
-        {filteredPosts.slice(indexOfFirstPost,indexOfLastPost).map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
+        {filteredPosts.slice(indexOfFirstPost, indexOfLastPost).map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
       </div>
 
-      {/* pagination */}
-      <Pagination postPerPage={postPerPage} totalPosts={filteredPosts?.length} currentPage={currentPage} paginate={paginate}></Pagination>
-
+      {/* Pagination */}
+      <Pagination 
+        postPerPage={postPerPage} 
+        totalPosts={filteredPosts?.length} 
+        currentPage={currentPage} 
+        paginate={paginate} 
+      />
     </div>
   );
 };
+
+// Fetch data at build time
+export async function getStaticProps() {
+  try {
+    const res = await fetch(`${baseUrl}/api/posts`);
+    const posts = await res.json();
+
+    return {
+      props: { posts }, 
+    };
+  } catch (error) {
+     console.log(error.message)
+  }
+}
 
 export default Home;
